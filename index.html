@@ -1,0 +1,130 @@
+<html>
+<head>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Slots</title>
+  <style type="text/css" media="screen">
+    body {
+      background-color: black;
+      color: white;
+      font-family: 'Lucida Grande', Verdana, Arial;
+      font-size: 12px;
+    }
+    #wrapper {
+      display:-webkit-box;
+      display:-moz-box;
+      -webkit-box-pack:center;
+      -moz-box-pack:center;
+      width:100%;
+      height:100%;
+    }
+    .container {
+      margin:0 70px 0 70px;
+      -webkit-perspective: 700px; 
+      -webkit-perspective-origin: 50% 450px;
+      -moz-perspective: 700px; 
+      -moz-perspective-origin: 50% 450px;
+    }
+    .stage {
+      width: 100%;
+      height: 100%;
+      -webkit-transition: -webkit-transform 2s;
+      -webkit-transform-style: preserve-3d;
+      -moz-transition: -moz-transform 2s;
+      -moz-transform-style: preserve-3d;
+    }
+    .shape {
+      position: relative;
+      margin: 0 auto;
+      height: 200px;
+      width: 200px;
+      -webkit-transform-style: preserve-3d;
+      -webkit-transition: -webkit-transform 1s;
+      -moz-transform-style: preserve-3d;
+      -moz-transition: -moz-transform 1s;
+    }
+    .plane {
+      position: absolute;
+      height: 200px;
+      width: 200px;
+      border: 1px solid white;
+      -webkit-border-radius: 12px;
+      -webkit-box-sizing: border-box;
+      -moz-border-radius: 12px;
+      -moz-box-sizing: border-box;
+      margin-top:400px;
+      text-align: center;
+      font-family: Times, serif;
+      font-size: 124pt;
+      color: black;
+      background-color: rgba(255, 255, 255, 0.6);
+      -webkit-transition: -webkit-transform 2s, opacity 2s;
+      -webkit-backface-visibility: hidden;
+      -moz-transition: -moz-transform 2s, opacity 2s;
+      -moz-backface-visibility: hidden;
+    }
+    .shape.backfaces .plane {
+      -webkit-backface-visibility: visible;
+      -moz-backface-visibility: visible;
+    }
+    @-webkit-keyframes spin {
+      from { -webkit-transform: rotateX(0); }
+      to   { -webkit-transform: rotateX(-360deg); }
+    }
+    .ring > .one {
+      -webkit-transform: translateZ(380px);
+      -moz-transform: translateZ(380px);
+    }
+    .ring > .two {
+      -webkit-transform: rotateX(30deg) translateZ(380px);
+      -moz-transform: rotateX(30deg) translateZ(380px);
+    }
+    .ring > .three {
+      -webkit-transform: rotateX(60deg) translateZ(380px);
+      -moz-transform: rotateX(60deg) translateZ(380px);
+    }
+    .ring > .four {
+      -webkit-transform: rotateX(90deg) translateZ(380px);
+      -moz-transform: rotateX(90deg) translateZ(380px);
+    }
+    .ring > .five {
+      -webkit-transform: rotateX(120deg) translateZ(380px);
+      -moz-transform: rotateX(120deg) translateZ(380px);
+    }
+    .ring > .six {
+      -webkit-transform: rotateX(150deg) translateZ(380px);
+      -moz-transform: rotateX(150deg) translateZ(380px);
+    }
+    .ring > .seven {
+      -webkit-transform: rotateX(180deg) translateZ(380px);
+      -moz-transform: rotateX(180deg) translateZ(380px);
+    }
+    .ring > .eight {
+      -webkit-transform: rotateX(210deg) translateZ(380px);
+      -moz-transform: rotateX(210deg) translateZ(380px);
+    }
+    .ring > .nine {
+      -webkit-transform: rotateX(-120deg) translateZ(380px);
+      -moz-transform: rotateX(-120deg) translateZ(380px);
+    }
+    .ring > .ten {
+      -webkit-transform: rotateX(-90deg) translateZ(380px);
+      -moz-transform: rotateX(-90deg) translateZ(380px);
+    }
+    .ring > .eleven {
+      -webkit-transform: rotateX(300deg) translateZ(380px);
+      -moz-transform: rotateX(300deg) translateZ(380px);
+    }
+    .ring > .twelve {
+      -webkit-transform: rotateX(330deg) translateZ(380px);
+      -moz-transform: rotateX(330deg) translateZ(380px);
+    }
+  </style>
+</head>
+<body>
+<script type='text/javascript' src='../require/lib/require.js'></script>
+<script type='text/javascript'>
+  require('loader').Loader({ws:'ws://'+location.hostname+':81/',http:location.origin,modules:['../monads/lib/utilities','../monads/lib/monads','../slots/lib/slots']});
+</script>
+</body>
+</html>
