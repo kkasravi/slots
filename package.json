@@ -1,0 +1,12 @@
+{
+  "name"          : "slots",
+  "description"   : "a mobile app which presents a configurable set of columns with images, similar to a slot machine",
+  "url"           : "http://kkasravi.github.com/slots.git",
+  "keywords"      : ["slot", "machine"],
+  "author"        : "Kam Kasravi <kkasravi@yahoo.com>",
+  "contributors"  : [],
+  "dependencies"  : {require,monads},
+  "lib"           : ".",
+  "main"          : "slots.es",
+  "version"       : "0.1"
+}
