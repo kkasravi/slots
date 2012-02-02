@@ -2,14 +2,17 @@ module slots {
   module log from 'log';
   module monads from 'monads';
   module controller from 'controller';
+  module events from 'events';
 
   class Ring {
     constructor(properties={}) {
-      private sections, shape;
+      private shape;
       @shape = properties.shape;
       for(var section in Ring.sections) {
-        shape.add(
-          monads.DOMable({tagName:'div'}).on('load').attributes({'class':'plane '+section}).text(Ring.sections[section])
+        @shape.add(
+          monads.DOMable({tagName:'div'}).on('load').attributes({'class':'plane '+section})
+//.style({'-webkit-backface-visibility':'visible'})
+//.text(Ring.sections[section])
         );
       }
     }
@@ -38,7 +41,6 @@ module slots {
       @stage.add(@shape);
       @container = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'container'});
       @container.add(@stage);
-      return @container;
     }
     static init = (function() {
       var styles = [
@@ -52,15 +54,21 @@ module slots {
 
   class Main {
     constructor() {
-      private main;
+      private main, container;
       @main = monads.DOMable({tagName:'div'}).on('load').attributes({'id':'main'});
+      @container = [];
       for(var i = 0; i < 4; ++i) {
-        @main.add(Container());
+        container.push(Container());
+        @main.add(container.top().container);
       }
       @main.insert(document.body);
       controller.Controller.subscribe('slotdata',this.onslotdata.bind(this));
     }
-    onslotdata(data) {
+    onslotdata(event) {
+      console.log('event received!!!');
+      event.detail.forEach(function(info,i) {
+        monads.DOMable({element:@container[info.slot].shape.child(info.index)}).on('load').add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image}));
+      }, this);
     }
     static init = (function() {
       var styles = [
@@ -74,6 +82,21 @@ module slots {
   class AppType {
     constructor() {
       Main();
+      var images = [
+        {slot:0,index:0,image:'../slots/images/solec.jpg'},
+        {slot:0,index:1,image:'../slots/images/Rapsel_elle.jpg'},
+        {slot:0,index:11,image:'../slots/images/carlisle.jpg'},
+        {slot:1,index:0,image:'../slots/images/gp_radiantbarrier.jpg'},
+        {slot:1,index:1,image:'../slots/images/thermastrand.jpg'},
+        {slot:1,index:11,image:'../slots/images/unicosystem.jpg'},
+        {slot:2,index:0,image:'../slots/images/gsky-com.jpg'},
+        {slot:2,index:1,image:'../slots/images/kitchen_recess.jpg'},
+        {slot:2,index:11,image:'../slots/images/whiteglass_counters.jpg'},
+        {slot:3,index:0,image:'../slots/images/hafele_loaxled.jpg'},
+        {slot:3,index:1,image:'../slots/images/solec.jpg'},
+        {slot:4,index:11,image:'../slots/images/silentFx.jpg'}
+      ];
+      controller.Controller.publish(events.CustomEvent({type:'slotdata',canBubble:false,isCanceleable:true,detail:images}));
     }
   }
   export const App = AppType();
