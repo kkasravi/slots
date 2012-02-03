@@ -11,8 +11,6 @@ module slots {
       for(var section in Ring.sections) {
         @shape.add(
           monads.DOMable({tagName:'div'}).on('load').attributes({'class':'plane '+section})
-//.style({'-webkit-backface-visibility':'visible'})
-//.text(Ring.sections[section])
         );
       }
     }
@@ -32,9 +30,11 @@ module slots {
     })()
   }
 
-  class Container {
+  class Container extends monads.Touchable {
     constructor(properties={}) {
       private container, stage, shape, plane;
+      monads.Touchable.call(this,properties);
+      @continuationConstructor = ContainerContinuation;
       @shape = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'shape ring'});
       Ring({shape:@shape});
       @stage = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'stage'}).translate({z:'-100px'});
@@ -52,6 +52,30 @@ module slots {
     })()
   }
 
+  class ContainerContinuation extends monads.TouchContinuation {
+    constructor(properties={}) {
+      monads.TouchContinuation.call(this,properties);
+    }
+    bindBehaviors() {
+      try {
+        @monad.on('touchstart').bind(this.ontouchstart.bind(this));
+        @monad.on('touchmove').bind(this.ontouchmove.bind(this), document, true);
+        @monad.on('touchend').bind(this.ontouchend.bind(this), document, true);
+      } catch(e) {
+        log.Logger.error(this,e);
+      }
+    }
+    ontouchstart(event) {
+      console.log('ontouchstart');
+    }
+    ontouchmove(event) {
+      console.log('ontouchmove');
+    }
+    ontouchend(event) {
+      console.log('ontouchend');
+    }
+  }
+
   class Main {
     constructor() {
       private main, container;
@@ -60,6 +84,7 @@ module slots {
       for(var i = 0; i < 4; ++i) {
         container.push(Container());
         @main.add(container.top().container);
+        container.top().on('load').bindBehaviors(container.top());
       }
       @main.insert(document.body);
       controller.Controller.subscribe('slotdata',this.onslotdata.bind(this));
@@ -94,7 +119,7 @@ module slots {
         {slot:2,index:11,image:'../slots/images/whiteglass_counters.jpg'},
         {slot:3,index:0,image:'../slots/images/hafele_loaxled.jpg'},
         {slot:3,index:1,image:'../slots/images/solec.jpg'},
-        {slot:4,index:11,image:'../slots/images/silentFx.jpg'}
+        {slot:3,index:11,image:'../slots/images/silentFx.jpg'}
       ];
       controller.Controller.publish(events.CustomEvent({type:'slotdata',canBubble:false,isCanceleable:true,detail:images}));
     }
