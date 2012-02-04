@@ -34,7 +34,7 @@ module slots {
     static sections = {"one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, "ten":10, "eleven":11, "twelve":12}
     static init = (function() {
       var styles = [
-        {selector:'.plane',style:"position:absolute;height:200px;width:200px;border:1px solid white;-webkit-border-radius:12px;-webkit-box-sizing:border-box;-moz-border-radius:12px;-moz-box-sizing:border-box;text-align:center;font-family:Times,serif;font-size:124pt;color:black;background-color:rgba(255, 255, 255, 0.6);-webkit-transition:-webkit-transform 2s,opacity 2s;-webkit-backface-visibility:hidden;-moz-transition:-moz-transform 2s, opacity 2s;-moz-backface-visibility: hidden;"}
+        {selector:'.plane',style:"position:absolute;height:200px;width:200px;border:transparent;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;text-align:center;font-family:Times,serif;font-size:124pt;color:black;background:transparent;-webkit-transition:-webkit-transform 2s,opacity 2s;-webkit-backface-visibility:hidden;-moz-transition:-moz-transform 2s, opacity 2s;-moz-backface-visibility: hidden;"}
       ];
       monads.Styleable(styles).on("load").onstyle();
       styles = [];
@@ -94,7 +94,7 @@ module slots {
     onslotdata(event) {
       console.log('event received!!!');
       event.detail.forEach(function(info,i) {
-        monads.DOMable({element:@container[info.slot].shape.child(info.index)}).on('load').add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image}));
+        monads.DOMable({element:@container[info.slot].shape.child(info.index)}).on('load').add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image}).round(12,12,12,12));
       }, this);
     }
     static init = (function() {
