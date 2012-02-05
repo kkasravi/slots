@@ -49,25 +49,35 @@ module slots {
 
   class Container {
     constructor(properties={}) {
-      private container, stage, shape, plane;
+      private container, stage, shape, plane, lastY, offsetY;
+      this.ontouchstart = this.ontouchstart.bind(this);
+      this.ontouchmove = this.ontouchmove.bind(this);
+      this.ontouchend = this.ontouchend.bind(this);
       @shape = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'shape ring'}).on('touchstart').bind(this.ontouchstart).on('touchmove').bind(this.ontouchmove).on('touchend').bind(this.ontouchend).continuation;
       Ring({shape:@shape});
       @stage = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'stage'}).translate({z:'-200px'});
       @stage.add(@shape);
       @container = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'container'});
       @container.add(@stage);
+      @lastY = undefined;
+      @offsetY = 0;
     }
     ontouchstart(event) {
       event.preventDefault();
-      console.log('ontouchstart');
+      var top = @container.element().style.top;
+      @lastY = parseInt(top,10);
+      @lastY = Math.isNumber(@lastY) ? @lastY : 0;
+      @offsetY = @shape.pointerY(event) - @lastY;
     }
     ontouchmove(event) {
       event.preventDefault();
-      console.log('ontouchmove');
+      @lastY = @shape.pointerY(event) - @offsetY;
+      @shape.rotate({x:-@lastY});
+console.log('lastY='+@lastY);
     }
     ontouchend(event) {
       event.preventDefault();
-      console.log('ontouchend');
+      @lastY = undefined;
     }
     static init = (function() {
       var styles = [
