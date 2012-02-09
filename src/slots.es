@@ -5,10 +5,8 @@ module slots {
   module events from 'events';
 
   class ConstsType {
-//    static columnWidth = (document.documentElement.clientWidth/4 - 140)
-    static columnWidth = 200
-//    static columnHeight = (document.documentElement.clientWidth/4 - 140)
-    static columnHeight = 200
+    static columnWidth = 200//(document.documentElement.clientWidth/4 - 140)
+    static columnHeight = 200//(document.documentElement.clientWidth/4 - 140)
   }
   const Consts = ConstsType();
 
@@ -111,19 +109,31 @@ console.log('columnWidth='+ConstsType.columnWidth+' columnHeight='+ConstsType.co
   class Main {
     constructor() {
       private main, container;
+      this.ontouchstart = this.ontouchstart.bind(this);
+      this.ontouchmove = this.ontouchmove.bind(this);
+      this.ontouchend = this.ontouchend.bind(this);
       @main = monads.DOMable({tagName:'div'}).on('load').attributes({'id':'main'});
       @container = [];
       for(var i = 0; i < 4; ++i) {
         container.push(Container());
         @main.add(container.top().container);
       }
-      @main.insert(document.body);
+      @main.insert(document.body).on('touchstart').bind(this.ontouchstart).on('touchmove').bind(this.ontouchmove).on('touchend').bind(this.ontouchend);
       controller.Controller.subscribe('slotdata',this.onslotdata.bind(this));
     }
     onslotdata(event) {
       event.detail.forEach(function(info,i) {
         monads.DOMable({element:@container[info.slot].shape.child(info.index)}).on('load').add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image,height:ConstsType.columnHeight+"px",width:ConstsType.columnWidth+"px"}).round(12,12,12,12));
       }, this);
+    }
+    ontouchstart(event) {
+      event.preventDefault();
+    }
+    ontouchmove(event) {
+      event.preventDefault();
+    }
+    ontouchend(event) {
+      event.preventDefault();
     }
     static init = (function() {
       var styles = [
