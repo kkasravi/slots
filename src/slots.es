@@ -44,7 +44,7 @@ module slots {
     static sections = {"one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, "ten":10, "eleven":11, "twelve":12}
     static init = (function() {
       var styles = [
-        {selector:'.plane',style:"position:absolute;height:"+ConstsType.columnHeight+"px;width:"+ConstsType.columnWidth+"px;border:transparent;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;text-align:center;font-family:Times,serif;font-size:124pt;color:black;background:transparent;-webkit-transition:-webkit-transform 2s,opacity 2s;-webkit-backface-visibility:hidden;-moz-transition:-moz-transform 2s, opacity 2s;-moz-backface-visibility: hidden;"},
+        {selector:'.plane',style:"position:absolute;height:"+ConstsType.columnHeight+"px;width:"+ConstsType.columnWidth+"px;border:transparent;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;text-align:center;font-family:Times,serif;font-size:24pt;color:black;background:transparent;-webkit-transition:-webkit-transform 2s,opacity 2s;-webkit-backface-visibility:hidden;-moz-transition:-moz-transform 2s, opacity 2s;-moz-backface-visibility: hidden;"},
         {selector:'.card',style:"width:100%;height:100%;-webkit-transform-style:preserve-3d;-webkit-transition:all 0.3s linear;"},
         {selector:'.face',style:"position:absolute;width:100%;height:100%;-webkit-backface-visibility:hidden;"},
         {selector:'.face.back',style:"display:block;-webkit-transform:rotateY(180deg);box-sizing:border-box;padding:10px;color:white;text-align:center;background-color:#aaa;-webkit-border-radius:12px;"}
@@ -62,12 +62,13 @@ module slots {
 
   class Container {
     constructor(properties={}) {
-      private active, container, direction, stage, shape, plane, lastY, totalY, startY, startTime;
+      private active, container, direction, lastY, moved, plane, stage, shape, startY, startTime, totalY;
       this.ontouchstart = this.ontouchstart.bind(this);
       this.ontouchmove = this.ontouchmove.bind(this);
       this.ontouchend = this.ontouchend.bind(this);
       @active = false;
       @direction = 1;
+      @moved = false;
       @shape = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'shape ring'}).on('touchstart').bind(this.ontouchstart).on('touchmove').bind(this.ontouchmove).on('touchend').bind(this.ontouchend).continuation;
       Ring({shape:@shape});
       @stage = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'stage'}).translate({z:'-200px'});
@@ -84,6 +85,7 @@ module slots {
         @active = true;
         event.preventDefault();
         @lastY = @shape.pointerY(event);
+        @moved = false;
         @startTime = new Date().getTime();
         @shape.style({'webkitTransitionDuration':'0ms'});
       }
@@ -98,17 +100,21 @@ module slots {
         @totalY += deltaY;
         @direction = deltaY > 0 ? 1 : -1;
         @shape.rotate({x:-@totalY});
+        @moved = true;
       }
     }
     ontouchend(event) {
       if(@active) {
         event.preventDefault();
         @active = false;
-        var newdistance = @totalY + 40*@direction;
-        var newtime = 500;
-        @shape.style({webkitTransition:"-webkit-transform "+newtime+"ms cubic-bezier(0.33,0.66,0.66,1)"});
-        @shape.rotate({x:-newdistance});
-        @startY = @totalY;
+        if(@moved) {
+          var newdistance = @totalY + 40*@direction;
+          var newtime = 500;
+          @shape.style({webkitTransition:"-webkit-transform "+newtime+"ms cubic-bezier(0.33,0.66,0.66,1)"});
+          @shape.rotate({x:-newdistance});
+          @startY = @totalY;
+          @moved = false;
+        }
       }
     }
     static init = (function() {
@@ -142,9 +148,9 @@ module slots {
         var card = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'card'});
         plane.add(card);
         var front = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'face'});
-        front.add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image,height:ConstsType.columnHeight+"px",width:ConstsType.columnWidth+"px"}).round(12,12,12,12));
-        var back = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'face back'});
-        back.text(info.slot+','+info.index);
+        front.add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image,height:ConstsType.columnHeight+"px",width:ConstsType.columnWidth+"px"}).round(12,12,12,12).shadow({horizontal:5,vertical:5,blurRadius:5,color:'#444',inset:false}));
+        var back = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'face back'}).shadow({horizontal:5,vertical:5,blurRadius:5,color:'#444',inset:false});
+        back.text('slot='+info.slot+'\\nindex='+info.index);
         card.add(front).add(back);
       }, this);
     }
@@ -159,7 +165,7 @@ module slots {
     }
     static init = (function() {
       var styles = [
-        {selector:'body',style:"background-color:black;color:white;font-family:'Lucida Grande',Verdana,Arial;font-size:12px;"},
+        {selector:'body',style:"background:-webkit-linear-gradient(63deg, #151515 5px, transparent 5px) 0 5px,-webkit-linear-gradient(243deg, #151515 5px, transparent 5px) 10px 0px,-webkit-linear-gradient(63deg, #222 5px, transparent 5px) 0px 10px,-webkit-linear-gradient(243deg, #222 5px, transparent 5px) 10px 5px,-webkit-linear-gradient(0deg, #1b1b1b 10px, transparent 10px),-webkit-linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%,transparent 50%,transparent 75%,#242424 75%, #242424);background-color:#131313;background-size:20px 20px;"},
         {selector:'#main',style:"display:-webkit-box;display:-moz-box;-webkit-box-pack:justify;-moz-box-pack:justify;width:100%;height:100%;"}
       ];
       monads.Styleable(styles).on("load").onstyle();
