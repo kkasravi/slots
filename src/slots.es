@@ -12,46 +12,42 @@ module slots {
 
   class Ring {
     constructor(properties={}) {
-      private shape, flipped, moved;
+      private shape, moved;
       this.ontouchstart = this.ontouchstart.bind(this);
       this.ontouchmove = this.ontouchmove.bind(this);
       this.ontouchend = this.ontouchend.bind(this);
       @shape = properties.shape;
-      @flipped = {};
       @moved = false;
       for(var section in Ring.sections) {
-        @shape.add(
-          monads.DOMable({tagName:'div'}).on('load').attributes({'class':'plane '+section}).on('touchstart').bind(this.ontouchstart).on('touchmove').bind(this.ontouchmove).on('touchend').bind(this.ontouchend).continuation
-        );
+        var ps = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'plane '+section});
+        ps.on('touchstart').bind(this.ontouchstart.curry(ps)).on('touchmove').bind(this.ontouchmove.curry(ps)).on('touchend').bind(this.ontouchend.curry(ps));
+        @shape.add(ps);
       }
     }
-    ontouchstart(event) {
+    ontouchstart(ps,event) {
       @moved = false;
     }
-    ontouchmove(event) {
+    ontouchmove(ps,event) {
       @moved = true;
     }
-    ontouchend(event) {
+    ontouchend(ps,event) {
       if(!@moved) {
-      var target = monads.DOMable({element:event.target}).on('load');
-      if(target.element().tagName.toLowerCase() !== 'img') { 
-        var img = target.child(0);
-        target = monads.DOMable({element:img}).on('load');
-      }
-      var f = @flipped[target.id()];
-      if(f) {
-        @flipped[target.id()] = null;
-        target.transition({property:'transform',timing:'1s'}).rotate({y:0});
-      } else {
-        @flipped[target.id()] = target;
-        target.transition({property:'transform',timing:'1s'}).rotate({y:180});
-      }
+        var target = monads.DOMable({element:ps.child(0)}).on('load');
+        var flipped = target.computed('-webkit-transform');
+        if(flipped === 'none') {
+          target.rotate({y:180});
+        } else {
+          target.rotate({y:0});
+        }
       }
     }
     static sections = {"one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, "ten":10, "eleven":11, "twelve":12}
     static init = (function() {
       var styles = [
-        {selector:'.plane',style:"position:absolute;height:"+ConstsType.columnHeight+"px;width:"+ConstsType.columnWidth+"px;border:transparent;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;text-align:center;font-family:Times,serif;font-size:124pt;color:black;background:transparent;-webkit-transition:-webkit-transform 2s,opacity 2s;-webkit-backface-visibility:hidden;-moz-transition:-moz-transform 2s, opacity 2s;-moz-backface-visibility: hidden;"}
+        {selector:'.plane',style:"position:absolute;height:"+ConstsType.columnHeight+"px;width:"+ConstsType.columnWidth+"px;border:transparent;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;text-align:center;font-family:Times,serif;font-size:124pt;color:black;background:transparent;-webkit-transition:-webkit-transform 2s,opacity 2s;-webkit-backface-visibility:hidden;-moz-transition:-moz-transform 2s, opacity 2s;-moz-backface-visibility: hidden;"},
+        {selector:'.card',style:"width:100%;height:100%;-webkit-transform-style:preserve-3d;-webkit-transition:all 0.3s linear;"},
+        {selector:'.face',style:"position:absolute;width:100%;height:100%;-webkit-backface-visibility:hidden;"},
+        {selector:'.face.back',style:"display:block;-webkit-transform:rotateY(180deg);box-sizing:border-box;padding:10px;color:white;text-align:center;background-color:#aaa;-webkit-border-radius:12px;"}
       ];
       monads.Styleable(styles).on("load").onstyle();
       styles = [];
@@ -66,37 +62,56 @@ module slots {
 
   class Container {
     constructor(properties={}) {
-      private container, stage, shape, plane, lastY, offsetY;
+      private active, container, direction, stage, shape, plane, lastY, totalY, startY, startTime;
       this.ontouchstart = this.ontouchstart.bind(this);
       this.ontouchmove = this.ontouchmove.bind(this);
       this.ontouchend = this.ontouchend.bind(this);
+      @active = false;
+      @direction = 1;
       @shape = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'shape ring'}).on('touchstart').bind(this.ontouchstart).on('touchmove').bind(this.ontouchmove).on('touchend').bind(this.ontouchend).continuation;
       Ring({shape:@shape});
       @stage = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'stage'}).translate({z:'-200px'});
       @stage.add(@shape);
       @container = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'container'});
       @container.add(@stage);
-      @lastY = undefined;
-      @offsetY = 0;
+      @lastY = 0;
+      @startTime = 0;
+      @startY = 0;
+      @totalY = 0;
     }
     ontouchstart(event) {
-      event.preventDefault();
-      var top = @container.element().style.top;
-      @lastY = parseInt(top,10);
-      @lastY = Math.isNumber(@lastY) ? @lastY : 0;
-      @offsetY = @shape.pointerY(event) - @lastY;
+      if(!@active) {
+        @active = true;
+        event.preventDefault();
+        @lastY = @shape.pointerY(event);
+        @startTime = new Date().getTime();
+        @shape.style({'webkitTransitionDuration':'0ms'});
+      }
     }
     ontouchmove(event) {
-      event.preventDefault();
-      @lastY = @shape.pointerY(event) - @offsetY;
-      @shape.rotate({x:-@lastY});
+      if(@active) {
+        event.preventDefault();
+        var Y = @shape.pointerY(event);
+        var deltaY = Y - @lastY;
+        deltaY /= 4;
+        @lastY = Y;
+        @totalY += deltaY;
+        @direction = deltaY > 0 ? 1 : -1;
+        @shape.rotate({x:-@totalY});
+      }
     }
     ontouchend(event) {
-      event.preventDefault();
-      @lastY = undefined;
+      if(@active) {
+        event.preventDefault();
+        @active = false;
+        var newdistance = @totalY + 40*@direction;
+        var newtime = 500;
+        @shape.style({webkitTransition:"-webkit-transform "+newtime+"ms cubic-bezier(0.33,0.66,0.66,1)"});
+        @shape.rotate({x:-newdistance});
+        @startY = @totalY;
+      }
     }
     static init = (function() {
-console.log('columnWidth='+ConstsType.columnWidth+' columnHeight='+ConstsType.columnHeight);
       var styles = [
         {selector:'.container',style:"margin:25% 10px;-webkit-perspective:2000px;-webkit-perspective-origin:50% 0px;-moz-perspective:2000px;-moz-perspective-origin: 50% 0px;"},
         {selector:'.stage',style:"width:100%;height:100%;-webkit-transition:-webkit-transform 2s;-webkit-transform-style:preserve-3d;-moz-transition:-moz-transform 2s;-moz-transform-style:preserve-3d;"},
@@ -123,7 +138,14 @@ console.log('columnWidth='+ConstsType.columnWidth+' columnHeight='+ConstsType.co
     }
     onslotdata(event) {
       event.detail.forEach(function(info,i) {
-        monads.DOMable({element:@container[info.slot].shape.child(info.index)}).on('load').add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image,height:ConstsType.columnHeight+"px",width:ConstsType.columnWidth+"px"}).round(12,12,12,12));
+        var plane = monads.DOMable({element:@container[info.slot].shape.child(info.index)}).on('load');
+        var card = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'card'});
+        plane.add(card);
+        var front = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'face'});
+        front.add(monads.DOMable({tagName:'img'}).on('load').attributes({src:info.image,height:ConstsType.columnHeight+"px",width:ConstsType.columnWidth+"px"}).round(12,12,12,12));
+        var back = monads.DOMable({tagName:'div'}).on('load').attributes({'class':'face back'});
+        back.text(info.slot+','+info.index);
+        card.add(front).add(back);
       }, this);
     }
     ontouchstart(event) {
