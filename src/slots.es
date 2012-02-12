@@ -5,8 +5,8 @@ module slots {
   module events from 'events';
 
   class ConstsType {
-    static columnWidth = 200//(document.documentElement.clientWidth/4 - 140)
-    static columnHeight = 200//(document.documentElement.clientWidth/4 - 140)
+    static columnWidth = 220//(document.documentElement.clientWidth/4 - 140)
+    static columnHeight = 220//(document.documentElement.clientWidth/4 - 140)
   }
   const Consts = ConstsType();
 
@@ -119,7 +119,7 @@ module slots {
     }
     static init = (function() {
       var styles = [
-        {selector:'.container',style:"margin:25% 10px;-webkit-perspective:2000px;-webkit-perspective-origin:50% 0px;-moz-perspective:2000px;-moz-perspective-origin: 50% 0px;"},
+        {selector:'.container',style:"margin:25% 10px;-webkit-perspective:5000px;-webkit-perspective-origin:50% 0px;-moz-perspective:2000px;-moz-perspective-origin: 50% 0px;"},
         {selector:'.stage',style:"width:100%;height:100%;-webkit-transition:-webkit-transform 2s;-webkit-transform-style:preserve-3d;-moz-transition:-moz-transform 2s;-moz-transform-style:preserve-3d;"},
         {selector:'.shape',style:"-webkit-transform-style:preserve-3d;position:relative;margin:0 auto;height:"+ConstsType.columnHeight+"px;width:"+ConstsType.columnWidth+"px;-webkit-transition:-webkit-transform 1s;-moz-transition:-moz-transform 1s;"}
       ];
